@@ -193,6 +193,53 @@ footer{text-align:center;color:#75869b;font-size:12px;padding:15px}
     </div>
 </div>
  </div>
+ <!-- CURRENCY CONVERTER CARD -->
+<div class="panel" style="margin-top:16px;background:#26364c">
+    <button class="tool" style="width:100%;text-align:left"
+        onclick="toggleCurrencyConverter()">
+        <strong>💱 CURRENCY CONVERTER</strong>
+        Convert currencies using live exchange rates
+    </button>
+
+    <div id="currencyConverter" style="display:none;margin-top:15px">
+        <h3>Currency Converter</h3>
+
+        <input class="field" type="number" id="currencyAmount"
+            placeholder="Enter amount" oninput="convertCurrency()">
+
+        <select class="field" id="currencyFrom" onchange="convertCurrency()">
+            <option value="UGX">Ugandan Shilling (UGX)</option>
+            <option value="USD">US Dollar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+            <option value="GBP">British Pound (GBP)</option>
+            <option value="KES">Kenyan Shilling (KES)</option>
+            <option value="TZS">Tanzanian Shilling (TZS)</option>
+            <option value="RWF">Rwandan Franc (RWF)</option>
+        </select>
+
+        <select class="field" id="currencyTo" onchange="convertCurrency()">
+            <option value="USD">US Dollar (USD)</option>
+            <option value="UGX">Ugandan Shilling (UGX)</option>
+            <option value="EUR">Euro (EUR)</option>
+            <option value="GBP">British Pound (GBP)</option>
+            <option value="KES">Kenyan Shilling (KES)</option>
+            <option value="TZS">Tanzanian Shilling (TZS)</option>
+            <option value="RWF">Rwandan Franc (RWF)</option>
+        </select>
+
+        <div class="result" id="currencyResult">
+            Enter an amount to convert.
+        </div>
+
+        <button class="tool" onclick="loadCurrencyRates()">
+            ↻ Update Exchange Rates
+        </button>
+
+        <p id="currencyStatus" style="font-size:12px;color:#9aabc0">
+            Exchange rates have not been loaded yet.
+        </p>
+    </div>
+</div>
 </section>
 
 <section id="tools" class="section">
@@ -431,6 +478,53 @@ function convertUnit(){
 
     result.textContent = Number(answer.toPrecision(10)) + " " + to;
                                             }
+ <!-- CURRENCY CONVERTER CARD -->
+<div class="panel" style="margin-top:16px;background:#26364c">
+    <button class="tool" style="width:100%;text-align:left"
+        onclick="toggleCurrencyConverter()">
+        <strong>💱 CURRENCY CONVERTER</strong>
+        Convert currencies using live exchange rates
+    </button>
+
+    <div id="currencyConverter" style="display:none;margin-top:15px">
+        <h3>Currency Converter</h3>
+
+        <input class="field" type="number" id="currencyAmount"
+            placeholder="Enter amount" oninput="convertCurrency()">
+
+        <select class="field" id="currencyFrom" onchange="convertCurrency()">
+            <option value="UGX">Ugandan Shilling (UGX)</option>
+            <option value="USD">US Dollar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+            <option value="GBP">British Pound (GBP)</option>
+            <option value="KES">Kenyan Shilling (KES)</option>
+            <option value="TZS">Tanzanian Shilling (TZS)</option>
+            <option value="RWF">Rwandan Franc (RWF)</option>
+        </select>
+
+        <select class="field" id="currencyTo" onchange="convertCurrency()">
+            <option value="USD">US Dollar (USD)</option>
+            <option value="UGX">Ugandan Shilling (UGX)</option>
+            <option value="EUR">Euro (EUR)</option>
+            <option value="GBP">British Pound (GBP)</option>
+            <option value="KES">Kenyan Shilling (KES)</option>
+            <option value="TZS">Tanzanian Shilling (TZS)</option>
+            <option value="RWF">Rwandan Franc (RWF)</option>
+        </select>
+
+        <div class="result" id="currencyResult">
+            Enter an amount to convert.
+        </div>
+
+        <button class="tool" onclick="loadCurrencyRates()">
+            ↻ Update Exchange Rates
+        </button>
+
+        <p id="currencyStatus" style="font-size:12px;color:#9aabc0">
+            Exchange rates have not been loaded yet.
+        </p>
+    </div>
+</div>
 </script>
 <script>
 if ("serviceWorker" in navigator) {
