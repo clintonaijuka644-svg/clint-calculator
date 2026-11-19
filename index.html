@@ -163,6 +163,35 @@ footer{text-align:center;color:#75869b;font-size:12px;padding:15px}
  <button class="key clear" onclick="clearDisplay()">AC</button>
  </div>
  <p style="color:#9aabc0;margin-top:12px;font-size:12px">Trigonometric functions use degrees.</p>
+  <!-- UNIT CONVERTER CARD -->
+<div class="panel" style="margin-top:16px;background:#26364c">
+    <button class="tool" style="width:100%;text-align:left"
+        onclick="toggleUnitConverter()">
+        <strong>↔ UNIT CONVERTER</strong>
+        Convert length, weight, volume and temperature
+    </button>
+
+    <div id="unitConverter" style="display:none;margin-top:15px">
+        <h3>Unit Converter</h3>
+
+        <select class="field" id="unitCategory" onchange="fillUnitOptions()">
+            <option value="length">Length</option>
+            <option value="weight">Weight</option>
+            <option value="volume">Volume</option>
+            <option value="temperature">Temperature</option>
+        </select>
+
+        <input class="field" type="number" id="unitValue"
+            placeholder="Enter value" oninput="convertUnit()">
+
+        <select class="field" id="unitFrom" onchange="convertUnit()"></select>
+        <select class="field" id="unitTo" onchange="convertUnit()"></select>
+
+        <div class="result" id="unitResult">
+            Your result will appear here.
+        </div>
+    </div>
+</div>
  </div>
 </section>
 
@@ -307,6 +336,101 @@ function runTool(){
  }
  document.getElementById("toolResult").textContent=r;
 }
+ function toggleUnitConverter(){
+    const box = document.getElementById("unitConverter");
+    const opening = box.style.display === "none";
+    box.style.display = opening ? "block" : "none";
+
+    if(opening && !document.getElementById("unitFrom").options.length){
+        fillUnitOptions();
+    }
+}
+
+const unitData = {
+    length: {
+        Metre: 1,
+        Kilometre: 1000,
+        Centimetre: 0.01,
+        Millimetre: 0.001,
+        Mile: 1609.344,
+        Foot: 0.3048,
+        Inch: 0.0254
+    },
+    weight: {
+        Kilogram: 1,
+        Gram: 0.001,
+        Milligram: 0.000001,
+        Pound: 0.45359237,
+        Ounce: 0.028349523125
+    },
+    volume: {
+        Litre: 1,
+        Millilitre: 0.001,
+        "Cubic metre": 1000,
+        "US gallon": 3.785411784
+    },
+    temperature: {
+        Celsius: "C",
+        Fahrenheit: "F",
+        Kelvin: "K"
+    }
+};
+
+function fillUnitOptions(){
+    const category = document.getElementById("unitCategory").value;
+    const from = document.getElementById("unitFrom");
+    const to = document.getElementById("unitTo");
+
+    from.innerHTML = "";
+    to.innerHTML = "";
+
+    Object.keys(unitData[category]).forEach(unit => {
+        from.add(new Option(unit, unit));
+        to.add(new Option(unit, unit));
+    });
+
+    if(to.options.length > 1) to.selectedIndex = 1;
+
+    convertUnit();
+}
+
+function convertUnit(){
+    const value = document.getElementById("unitValue").value;
+    const category = document.getElementById("unitCategory").value;
+    const from = document.getElementById("unitFrom").value;
+    const to = document.getElementById("unitTo").value;
+    const result = document.getElementById("unitResult");
+
+    if(value === ""){
+        result.textContent = "Your result will appear here.";
+        return;
+    }
+
+    const number = Number(value);
+
+    if(!Number.isFinite(number)){
+        result.textContent = "Enter a valid number.";
+        return;
+    }
+
+    let answer;
+
+    if(category === "temperature"){
+        let celsius;
+
+        if(from === "Celsius") celsius = number;
+        else if(from === "Fahrenheit") celsius = (number - 32) * 5/9;
+        else celsius = number - 273.15;
+
+        if(to === "Celsius") answer = celsius;
+        else if(to === "Fahrenheit") answer = celsius * 9/5 + 32;
+        else answer = celsius + 273.15;
+    } else {
+        answer = number * unitData[category][from] / unitData[category][to];
+    }
+
+    result.textContent = Number(answer.toPrecision(10)) + " " + to;
+                                            }
 </script>
 <script>
 if ("serviceWorker" in navigator) {
@@ -318,174 +442,7 @@ if ("serviceWorker" in navigator) {
 }
 </script>
  
-<!-- CLINT CALCULATOR: UNIT CONVERTER -->
-<style>
-.unit-converter {
-    background: var(--card, #ffffff);
-    color: var(--text, #222222);
-    padding: 18px;
-    margin: 20px 0;
-    border-radius: 16px;
-    border: 1px solid #8884;
-}
-.unit-converter h2 {
-    margin-top: 0;
-    color: #1769d2;
-}
-.unit-converter label {
-    display: block;
-    margin-top: 12px;
-    font-weight: 600;
-}
-.unit-converter select,
-.unit-converter input {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    border: 1px solid #aaa;
-    border-radius: 9px;
-    font-size: 16px;
-    box-sizing: border-box;
-    background: var(--input-bg, #fff);
-    color: var(--text, #222);
-}
-.unit-converter .unit-result {
-    margin-top: 16px;
-    padding: 15px;
-    background: #e8f1ff;
-    color: #123c75;
-    border-radius: 10px;
-    font-size: 19px;
-    font-weight: bold;
-    overflow-wrap: anywhere;
-}
-</style>
 
-<section class="unit-converter">
-    <h2>Unit Converter</h2>
-    <p>Convert common measurements quickly.</p>
-
-    <label for="cc-unit-category">Choose category</label>
-    <select id="cc-unit-category">
-        <option value="length">Length</option>
-        <option value="weight">Weight</option>
-        <option value="volume">Volume</option>
-        <option value="temperature">Temperature</option>
-    </select>
-
-    <label for="cc-unit-value">Enter value</label>
-    <input type="number" id="cc-unit-value"
-           placeholder="Enter a number" step="any">
-
-    <label for="cc-unit-from">From</label>
-    <select id="cc-unit-from"></select>
-
-    <label for="cc-unit-to">To</label>
-    <select id="cc-unit-to"></select>
-
-    <div class="unit-result" id="cc-unit-result">
-        Your result will appear here.
-    </div>
-</section>
-
-<script>
-(function () {
-    const category = document.getElementById("cc-unit-category");
-    const value = document.getElementById("cc-unit-value");
-    const from = document.getElementById("cc-unit-from");
-    const to = document.getElementById("cc-unit-to");
-    const result = document.getElementById("cc-unit-result");
-
-    const units = {
-        length: {
-            metre: 1,
-            kilometre: 1000,
-            centimetre: 0.01,
-            millimetre: 0.001,
-            mile: 1609.344,
-            foot: 0.3048,
-            inch: 0.0254
-        },
-        weight: {
-            kilogram: 1,
-            gram: 0.001,
-            milligram: 0.000001,
-            pound: 0.45359237,
-            ounce: 0.028349523125
-        },
-        volume: {
-            litre: 1,
-            millilitre: 0.001,
-            "cubic metre": 1000,
-            "US gallon": 3.785411784
-        },
-        temperature: {
-            Celsius: "C",
-            Fahrenheit: "F",
-            Kelvin: "K"
-        }
-    };
-
-    function fillUnits() {
-        const selected = units[category.value];
-        from.innerHTML = "";
-        to.innerHTML = "";
-
-        Object.keys(selected).forEach(unit => {
-            from.add(new Option(unit, unit));
-            to.add(new Option(unit, unit));
-        });
-
-        if (to.options.length > 1) to.selectedIndex = 1;
-        convert();
-    }
-
-    function convertTemperature(number, source, target) {
-        let celsius;
-
-        if (source === "Celsius") celsius = number;
-        if (source === "Fahrenheit") celsius = (number - 32) * 5 / 9;
-        if (source === "Kelvin") celsius = number - 273.15;
-
-        if (target === "Celsius") return celsius;
-        if (target === "Fahrenheit") return celsius * 9 / 5 + 32;
-        if (target === "Kelvin") return celsius + 273.15;
-    }
-
-    function convert() {
-        if (value.value === "") {
-            result.textContent = "Your result will appear here.";
-            return;
-        }
-
-        const number = Number(value.value);
-        let answer;
-
-        if (!Number.isFinite(number)) {
-            result.textContent = "Please enter a valid number.";
-            return;
-        }
-
-        if (category.value === "temperature") {
-            answer = convertTemperature(number, from.value, to.value);
-        } else {
-            answer = number * units[category.value][from.value]
-                / units[category.value][to.value];
-        }
-
-        result.textContent = Number(answer.toPrecision(10)) +
-            " " + to.value;
-    }
-
-    category.addEventListener("change", fillUnits);
-    value.addEventListener("input", convert);
-    from.addEventListener("change", convert);
-    to.addEventListener("change", convert);
-
-    fillUnits();
-})();
-</script>
-<!-- END UNIT CONVERTER -->
  
 </body>
 </html>
