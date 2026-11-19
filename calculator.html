@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Clint Calculator</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+ font-family:Arial,sans-serif;
+ background:#101827;color:white;
+ min-height:100vh;padding:18px;
+}
+.app{max-width:440px;margin:auto}
+header{
+ display:flex;justify-content:space-between;
+ align-items:center;margin:10px 0 25px;
+}
+.brand{font-size:23px;font-weight:bold;color:#00dfa0}
+.brand small{display:block;font-size:11px;color:#9aabc0;margin-top:5px}
+.icon-btn{
+ background:#26364c;color:white;border:0;
+ padding:11px;border-radius:10px;font-size:18px;
+}
+.tabs{display:flex;gap:8px;margin-bottom:15px}
+.tab{
+ flex:1;padding:12px 5px;border:0;border-radius:10px;
+ background:#26364c;color:#b8c5d5;font-weight:bold;
+}
+.tab.active{background:#00a878;color:white}
+.panel{
+ background:#1b293c;border-radius:20px;
+ padding:17px;margin-bottom:17px;
+}
+#display{
+ width:100%;height:95px;background:#0b1421;
+ border:0;border-radius:12px;color:#00dfa0;
+ text-align:right;font-size:34px;padding:15px;
+ margin-bottom:14px;
+}
+#previous{text-align:right;color:#93a4b8;font-size:13px;min-height:20px;margin-bottom:7px}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+button{cursor:pointer}
+.key{
+ height:57px;border:0;border-radius:12px;
+ background:#34465e;color:white;font-size:19px;
+}
+.key:active{opacity:.7}
+.operator{background:#087eae}
+.special{background:#45546c}
+.clear{background:#d84450}
+.equal{background:#00a878;grid-column:span 2}
+.wide{grid-column:span 2}
+.section{display:none}
+.section.active{display:block}
+h3{margin-bottom:13px}
+.history-item{
+ padding:12px;background:#26364c;
+ border-radius:9px;margin:8px 0;
+ display:flex;justify-content:space-between;
+ color:#d9e5f2;gap:8px;
+}
+.history-item button{
+ background:none;color:#00dfa0;border:0;font-size:14px
+}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tool{
+ background:#26364c;border:0;color:white;
+ border-radius:12px;padding:16px 8px;text-align:center;
+}
+.tool strong{display:block;color:#00dfa0;margin-bottom:7px}
+.field{
+ width:100%;padding:13px;margin:8px 0;
+ background:#0b1421;color:white;border:1px solid #42536a;
+ border-radius:9px;font-size:16px;
+}
+.action{
+ width:100%;padding:13px;background:#00a878;
+ color:white;border:0;border-radius:10px;margin-top:8px;
+ font-size:16px;font-weight:bold;
+}
+.result{color:#00dfa0;margin-top:13px;font-size:20px;font-weight:bold}
+footer{text-align:center;color:#75869b;font-size:12px;padding:15px}
+.light{
+ background:#eaf0f6;color:#172538
+}
+.light .panel{background:#fff}
+.light .key,.light .tool,.light .history-item{background:#dce5ef;color:#172538}
+.light #display{background:#eaf0f6;color:#087eae}
+.light .field{background:#f4f7fa;color:#172538}
+.light .tab:not(.active){background:#dce5ef;color:#172538}
+.light .icon-btn{background:#dce5ef;color:#172538}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+ <div class="brand">CLINT CALCULATOR
+ <small>SMART CALCULATIONS • ANYTIME</small></div>
+ <button class="icon-btn" onclick="toggleTheme()">☀</button>
+</header>
+
+<div class="tabs">
+ <button class="tab active" onclick="showTab('standard',this)">Standard</button>
+ <button class="tab" onclick="showTab('scientific',this)">Scientific</button>
+ <button class="tab" onclick="showTab('tools',this)">Tools</button>
+</div>
+
+<section id="standard" class="section active">
+ <div class="panel">
+ <div id="previous"></div>
+ <input id="display" readonly placeholder="0">
+ <div class="buttons" id="basicButtons">
+ <button class="key clear" onclick="clearDisplay()">AC</button>
+ <button class="key special" onclick="del()">DEL</button>
+ <button class="key special" onclick="append('%')">%</button>
+ <button class="key operator" onclick="append('/')">÷</button>
+
+ <button class="key" onclick="append('7')">7</button>
+ <button class="key" onclick="append('8')">8</button>
+ <button class="key" onclick="append('9')">9</button>
+ <button class="key operator" onclick="append('*')">×</button>
+
+ <button class="key" onclick="append('4')">4</button>
+ <button class="key" onclick="append('5')">5</button>
+ <button class="key" onclick="append('6')">6</button>
+ <button class="key operator" onclick="append('-')">−</button>
+
+ <button class="key" onclick="append('1')">1</button>
+ <button class="key" onclick="append('2')">2</button>
+ <button class="key" onclick="append('3')">3</button>
+ <button class="key operator" onclick="append('+')">+</button>
+
+ <button class="key wide" onclick="append('0')">0</button>
+ <button class="key" onclick="append('.')">.</button>
+ <button class="key equal" onclick="calculate()">=</button>
+ </div>
+ </div>
+</section>
+
+<section id="scientific" class="section">
+ <div class="panel">
+ <h3>Scientific Calculator</h3>
+ <div class="buttons">
+ <button class="key special" onclick="scientific('sin')">sin</button>
+ <button class="key special" onclick="scientific('cos')">cos</button>
+ <button class="key special" onclick="scientific('tan')">tan</button>
+ <button class="key special" onclick="scientific('sqrt')">√</button>
+ <button class="key special" onclick="scientific('square')">x²</button>
+ <button class="key special" onclick="scientific('log')">log</button>
+ <button class="key special" onclick="scientific('ln')">ln</button>
+ <button class="key special" onclick="scientific('pi')">π</button>
+ <button class="key special" onclick="scientific('fact')">n!</button>
+ <button class="key special" onclick="append('(')">(</button>
+ <button class="key special" onclick="append(')')">)</button>
+ <button class="key clear" onclick="clearDisplay()">AC</button>
+ </div>
+ <p style="color:#9aabc0;margin-top:12px;font-size:12px">Trigonometric functions use degrees.</p>
+ </div>
+</section>
+
+<section id="tools" class="section">
+ <div class="panel">
+ <h3>Smart Tools</h3>
+ <div class="tool-grid">
+ <button class="tool" onclick="openTool('percentage')"><strong>%</strong>Percentage</button>
+ <button class="tool" onclick="openTool('bmi')"><strong>⚖</strong>BMI calculator</button>
+ <button class="tool" onclick="openTool('drip')"><strong>💧</strong>IV drip practice</button>
+ <button class="tool" onclick="openTool('fluid')"><strong>🩺</strong>Fluid balance</button>
+ </div>
+ </div>
+
+ <div class="panel" id="toolPanel">
+ <h3 id="toolTitle">Choose a tool above</h3>
+ <div id="toolFields"></div>
+ <button class="action" id="toolAction" style="display:none" onclick="runTool()">Calculate</button>
+ <div class="result" id="toolResult"></div>
+ </div>
+</section>
+
+<div class="panel">
+ <h3>Calculation History</h3>
+ <div id="history"><p style="color:#91a2b8">No calculations yet.</p></div>
+ <button class="action" onclick="clearHistory()">Clear History</button>
+</div>
+
+<footer>CLINT CALCULATOR © 2026<br>Designed for learning and everyday calculations</footer>
+</div>
+
+<script>
+const display=document.getElementById("display");
+let history=[];
+let currentTool="";
+
+function showTab(id,button){
+ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+ button.classList.add("active");
+}
+function append(v){display.value+=v}
+function clearDisplay(){display.value="";document.getElementById("previous").textContent=""}
+function del(){display.value=display.value.slice(0,-1)}
+
+function format(n){
+ return Number.isFinite(n)?Number(n.toPrecision(12)).toString():"Error";
+}
+
+function calculate(){
+ try{
+ let exp=display.value;
+ if(!exp||!/^[0-9+\-*/().% ]+$/.test(exp))throw Error();
+ let result=Function('"use strict";return ('+exp+')')();
+ if(!Number.isFinite(result))throw Error();
+ result=format(result);
+ document.getElementById("previous").textContent=exp+" =";
+ display.value=result;
+ addHistory(exp,result);
+ }catch{display.value="Error"}
+}
+
+function scientific(type){
+ let x=Number(display.value);
+ if(type==="pi"){display.value=Math.PI;return}
+ if(!display.value||!Number.isFinite(x))return;
+ let r;
+ switch(type){
+ case "sin":r=Math.sin(x*Math.PI/180);break;
+ case "cos":r=Math.cos(x*Math.PI/180);break;
+ case "tan":r=Math.tan(x*Math.PI/180);break;
+ case "sqrt":r=Math.sqrt(x);break;
+ case "square":r=x*x;break;
+ case "log":r=Math.log10(x);break;
+ case "ln":r=Math.log(x);break;
+ case "fact":
+ if(x<0||!Number.isInteger(x)||x>170){display.value="Error";return}
+ r=1;for(let i=2;i<=x;i++)r*=i;break;
+ }
+ if(!Number.isFinite(r)){display.value="Error";return}
+ let old=display.value;
+ display.value=format(r);
+ addHistory(type+"("+old+")",display.value);
+}
+
+function addHistory(a,b){
+ history.unshift({a,b});
+ history=history.slice(0,20);
+ renderHistory();
+}
+function renderHistory(){
+ document.getElementById("history").innerHTML=history.length?
+ history.map((h,i)=>`<div class="history-item"><span>${h.a} = <b>${h.b}</b></span><button onclick="recall(${i})">Use</button></div>`).join(""):
+ '<p style="color:#91a2b8">No calculations yet.</p>';
+}
+function recall(i){display.value=history[i].b}
+function clearHistory(){history=[];renderHistory()}
+
+function toggleTheme(){document.body.classList.toggle("light")}
+
+function openTool(type){
+ currentTool=type;
+ let titles={
+ percentage:"Percentage Calculator",
+ bmi:"BMI Calculator",
+ drip:"IV Drip Rate Practice",
+ fluid:"Fluid Balance Calculator"
+ };
+ document.getElementById("toolTitle").textContent=titles[type];
+ document.getElementById("toolResult").textContent="";
+ document.getElementById("toolAction").style.display="block";
+ let fields={
+ percentage:'<input class="field" id="a" type="number" placeholder="Enter the number"><input class="field" id="b" type="number" placeholder="Enter percentage">',
+ bmi:'<input class="field" id="a" type="number" placeholder="Weight in kg"><input class="field" id="b" type="number" placeholder="Height in metres">',
+ drip:'<input class="field" id="a" type="number" placeholder="Volume in mL"><input class="field" id="b" type="number" placeholder="Time in hours"><input class="field" id="c" type="number" placeholder="Drop factor (drops/mL)">',
+ fluid:'<input class="field" id="a" type="number" placeholder="Total fluid intake (mL)"><input class="field" id="b" type="number" placeholder="Total fluid output (mL)">'
+ };
+ document.getElementById("toolFields").innerHTML=fields[type];
+}
+function runTool(){
+ let a=Number(document.getElementById("a").value);
+ let b=Number(document.getElementById("b").value);
+ let c=document.getElementById("c")?Number(document.getElementById("c").value):0;
+ let r;
+ if(currentTool==="percentage"){
+ if(!Number.isFinite(a)||!Number.isFinite(b))return;
+ r=a*b/100+" is "+b+"% of "+a;
+ }
+ if(currentTool==="bmi"){
+ if(a<=0||b<=0)return;
+ r="BMI: "+format(a/(b*b))+" kg/m². Interpret using appropriate age-specific guidance.";
+ }
+ if(currentTool==="drip"){
+ if(a<=0||b<=0||c<=0)return;
+ r="Practice result: "+format((a*c)/(b*60))+" drops/min";
+ }
+ if(currentTool==="fluid"){
+ if(a<0||b<0)return;
+ let balance=a-b;
+ r="Fluid balance: "+format(balance)+" mL ("+(balance>=0?"positive":"negative")+")";
+ }
+ document.getElementById("toolResult").textContent=r;
+}
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+        .then(() => console.log("Clint Calculator is ready offline"))
+        .catch(error => console.error("Service worker error:", error));
+    });
+}
+</script>
+</body>
+</html>
