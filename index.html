@@ -1,496 +1,404 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
+<meta name="description" content="Clint Calculator - standard, scientific and useful study calculators.">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
 <title>Clint Calculator</title>
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{
- font-family:Arial,sans-serif;
- background:#101827;color:white;
- min-height:100vh;padding:18px;
+:root{
+  --bg:#101827;--panel:#1b293c;--panel2:#26364c;--btn:#34465e;
+  --text:#f4f7fb;--muted:#aebdd0;--accent:#00dfa0;--border:#3b4d64;
+  --danger:#ff7777;--input:#142236;--shadow:0 10px 28px rgba(0,0,0,.18)
 }
-.app{max-width:440px;margin:auto}
-header{
- display:flex;justify-content:space-between;
- align-items:center;margin:10px 0 25px;
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+body.light{
+  --bg:#edf2f8;--panel:#fff;--panel2:#e7eef7;--btn:#dce5f0;
+  --text:#172235;--muted:#53657b;--accent:#008f6b;--border:#cbd6e3;
+  --danger:#c83232;--input:#f7f9fc;--shadow:0 8px 22px rgba(24,42,65,.08)
 }
-.brand{font-size:23px;font-weight:bold;color:#00dfa0}
-.brand small{display:block;font-size:11px;color:#9aabc0;margin-top:5px}
-.icon-btn{
- background:#26364c;color:white;border:0;
- padding:11px;border-radius:10px;font-size:18px;
-}
-.tabs{display:flex;gap:8px;margin-bottom:15px}
-.tab{
- flex:1;padding:12px 5px;border:0;border-radius:10px;
- background:#26364c;color:#b8c5d5;font-weight:bold;
-}
-.tab.active{background:#00a878;color:white}
-.panel{
- background:#1b293c;border-radius:20px;
- padding:17px;margin-bottom:17px;
-}
-#display{
- width:100%;height:95px;background:#0b1421;
- border:0;border-radius:12px;color:#00dfa0;
- text-align:right;font-size:34px;padding:15px;
- margin-bottom:14px;
-}
-#previous{text-align:right;color:#93a4b8;font-size:13px;min-height:20px;margin-bottom:7px}
-.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-button{cursor:pointer}
-.key{
- height:57px;border:0;border-radius:12px;
- background:#34465e;color:white;font-size:19px;
-}
-.key:active{opacity:.7}
-.operator{background:#087eae}
-.special{background:#45546c}
-.clear{background:#d84450}
-.equal{background:#00a878;grid-column:span 2}
-.wide{grid-column:span 2}
+header{padding:22px 16px 12px;text-align:center}
+header h1{margin:0;color:var(--accent);font-size:27px}
+header p{margin:7px 0 0;color:var(--muted);font-size:13px}
+.app{width:min(760px,100%);margin:auto;padding:8px 14px 32px}
+.top-actions{display:flex;justify-content:flex-end;gap:8px;margin:4px 0 12px}
+.small-btn,.tab,.key,.action-btn{border:1px solid var(--border);background:var(--btn);color:var(--text);border-radius:12px;cursor:pointer}
+.small-btn{padding:9px 12px;font-size:13px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tab{padding:13px 8px;font-weight:700}
+.tab.active{background:var(--accent);color:#06251d;border-color:var(--accent)}
 .section{display:none}
 .section.active{display:block}
-h3{margin-bottom:13px}
-.history-item{
- padding:12px;background:#26364c;
- border-radius:9px;margin:8px 0;
- display:flex;justify-content:space-between;
- color:#d9e5f2;gap:8px;
-}
-.history-item button{
- background:none;color:#00dfa0;border:0;font-size:14px
-}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+h2,h3{margin:0 0 13px}
+h2{font-size:20px}h3{font-size:17px}
+.display{width:100%;min-height:82px;background:var(--input);border:1px solid var(--border);border-radius:13px;padding:17px 14px;margin-bottom:12px;text-align:right;overflow-wrap:anywhere;font-size:30px;color:var(--text)}
+.expression{min-height:20px;color:var(--muted);font-size:13px;text-align:right;margin:-5px 3px 9px;overflow-wrap:anywhere}
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.key{min-height:55px;font-size:18px;font-weight:600}
+.key.operator{color:var(--accent)}
+.key.equal{background:var(--accent);color:#06251d;border-color:var(--accent)}
+.key.clear{color:var(--danger)}
+.science-keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.science-keys .key{min-height:45px;font-size:15px}
+.field{margin:10px 0}
+label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+input,select{width:100%;padding:12px;background:var(--input);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:16px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+.action-btn{padding:12px 15px;background:var(--accent);color:#06251d;border:0;font-weight:700;width:100%;margin-top:8px}
+.result{margin-top:12px;padding:12px;border-radius:10px;background:var(--panel2);min-height:42px;line-height:1.5;overflow-wrap:anywhere}
+.muted{color:var(--muted);font-size:12px;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tool{
- background:#26364c;border:0;color:white;
- border-radius:12px;padding:16px 8px;text-align:center;
+.tool-card{background:var(--panel2);border:1px solid var(--border);border-radius:13px;padding:13px}
+.tool-card h3{margin-bottom:8px}
+.history-list{padding-left:20px;color:var(--muted);font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+.history-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.history-head h3{margin:0}
+button:active{transform:scale(.98)}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:8px}
+@media(max-width:430px){
+  .app{padding-left:10px;padding-right:10px}
+  .panel{padding:13px}
+  .key{min-height:51px;font-size:17px}
+  .grid2,.tool-grid{grid-template-columns:1fr}
+  .display{font-size:27px}
 }
-.tool strong{display:block;color:#00dfa0;margin-bottom:7px}
-.field{
- width:100%;padding:13px;margin:8px 0;
- background:#0b1421;color:white;border:1px solid #42536a;
- border-radius:9px;font-size:16px;
-}
-.action{
- width:100%;padding:13px;background:#00a878;
- color:white;border:0;border-radius:10px;margin-top:8px;
- font-size:16px;font-weight:bold;
-}
-.result{color:#00dfa0;margin-top:13px;font-size:20px;font-weight:bold}
-footer{text-align:center;color:#75869b;font-size:12px;padding:15px}
-.light{
- background:#eaf0f6;color:#172538
-}
-.light .panel{background:#fff}
-.light .key,.light .tool,.light .history-item{background:#dce5ef;color:#172538}
-.light #display{background:#eaf0f6;color:#087eae}
-.light .field{background:#f4f7fa;color:#172538}
-.light .tab:not(.active){background:#dce5ef;color:#172538}
-.light .icon-btn{background:#dce5ef;color:#172538}
 </style>
 </head>
-
 <body>
-<div class="app">
-
 <header>
- <div class="brand">CLINT CALCULATOR
- <small>SMART CALCULATIONS • ANYTIME</small></div>
- <button class="icon-btn" onclick="toggleTheme()">☀</button>
+  <h1>Clint Calculator</h1>
+  <p>Simple calculations • Scientific functions • Study tools</p>
 </header>
 
-<div class="tabs">
- <button class="tab active" onclick="showTab('standard',this)">Standard</button>
- <button class="tab" onclick="showTab('scientific',this)">Scientific</button>
- <button class="tab" onclick="showTab('tools',this)">Tools</button>
-</div>
+<main class="app">
+  <div class="top-actions">
+    <button class="small-btn" type="button" onclick="toggleTheme()">🌙 / ☀️ Theme</button>
+  </div>
 
-<section id="standard" class="section active">
- <div class="panel">
- <div id="previous"></div>
- <input id="display" readonly placeholder="0">
- <div class="buttons" id="basicButtons">
- <button class="key clear" onclick="clearDisplay()">AC</button>
- <button class="key special" onclick="del()">DEL</button>
- <button class="key special" onclick="append('%')">%</button>
- <button class="key operator" onclick="append('/')">÷</button>
+  <nav class="tabs" aria-label="Calculator sections">
+    <button class="tab active" type="button" onclick="showTab('standard',this)">Standard</button>
+    <button class="tab" type="button" onclick="showTab('scientific',this)">Scientific</button>
+    <button class="tab" type="button" onclick="showTab('tools',this)">Tools</button>
+  </nav>
 
- <button class="key" onclick="append('7')">7</button>
- <button class="key" onclick="append('8')">8</button>
- <button class="key" onclick="append('9')">9</button>
- <button class="key operator" onclick="append('*')">×</button>
+  <section id="standard" class="section active">
+    <div class="panel">
+      <h2>Standard Calculator</h2>
+      <div id="display" class="display" aria-live="polite">0</div>
+      <div id="expression" class="expression"></div>
+      <div class="keys">
+        <button class="key clear" onclick="clearDisplay()">AC</button>
+        <button class="key" onclick="deleteLast()">DEL</button>
+        <button class="key operator" onclick="appendValue('%')">%</button>
+        <button class="key operator" onclick="appendValue('/')">÷</button>
 
- <button class="key" onclick="append('4')">4</button>
- <button class="key" onclick="append('5')">5</button>
- <button class="key" onclick="append('6')">6</button>
- <button class="key operator" onclick="append('-')">−</button>
+        <button class="key" onclick="appendValue('7')">7</button>
+        <button class="key" onclick="appendValue('8')">8</button>
+        <button class="key" onclick="appendValue('9')">9</button>
+        <button class="key operator" onclick="appendValue('*')">×</button>
 
- <button class="key" onclick="append('1')">1</button>
- <button class="key" onclick="append('2')">2</button>
- <button class="key" onclick="append('3')">3</button>
- <button class="key operator" onclick="append('+')">+</button>
+        <button class="key" onclick="appendValue('4')">4</button>
+        <button class="key" onclick="appendValue('5')">5</button>
+        <button class="key" onclick="appendValue('6')">6</button>
+        <button class="key operator" onclick="appendValue('-')">−</button>
 
- <button class="key wide" onclick="append('0')">0</button>
- <button class="key" onclick="append('.')">.</button>
- <button class="key equal" onclick="calculate()">=</button>
- </div>
- </div>
-</section>
+        <button class="key" onclick="appendValue('1')">1</button>
+        <button class="key" onclick="appendValue('2')">2</button>
+        <button class="key" onclick="appendValue('3')">3</button>
+        <button class="key operator" onclick="appendValue('+')">+</button>
 
-<section id="scientific" class="section">
- <div class="panel">
- <h3>Scientific Calculator</h3>
- <div class="buttons">
- <button class="key special" onclick="scientific('sin')">sin</button>
- <button class="key special" onclick="scientific('cos')">cos</button>
- <button class="key special" onclick="scientific('tan')">tan</button>
- <button class="key special" onclick="scientific('sqrt')">√</button>
- <button class="key special" onclick="scientific('square')">x²</button>
- <button class="key special" onclick="scientific('log')">log</button>
- <button class="key special" onclick="scientific('ln')">ln</button>
- <button class="key special" onclick="scientific('pi')">π</button>
- <button class="key special" onclick="scientific('fact')">n!</button>
- <button class="key special" onclick="append('(')">(</button>
- <button class="key special" onclick="append(')')">)</button>
- <button class="key clear" onclick="clearDisplay()">AC</button>
- </div>
- <p style="color:#9aabc0;margin-top:12px;font-size:12px">Trigonometric functions use degrees.</p>
-  <!-- UNIT CONVERTER CARD -->
-<div class="panel" style="margin-top:16px;background:#26364c">
-    <button class="tool" style="width:100%;text-align:left"
-        onclick="toggleUnitConverter()">
-        <strong>↔ UNIT CONVERTER</strong>
-        Convert length, weight, volume and temperature
-    </button>
-
-    <div id="unitConverter" style="display:none;margin-top:15px">
-        <h3>Unit Converter</h3>
-
-        <select class="field" id="unitCategory" onchange="fillUnitOptions()">
-            <option value="length">Length</option>
-            <option value="weight">Weight</option>
-            <option value="volume">Volume</option>
-            <option value="temperature">Temperature</option>
-        </select>
-
-        <input class="field" type="number" id="unitValue"
-            placeholder="Enter value" oninput="convertUnit()">
-
-        <select class="field" id="unitFrom" onchange="convertUnit()"></select>
-        <select class="field" id="unitTo" onchange="convertUnit()"></select>
-
-        <div class="result" id="unitResult">
-            Your result will appear here.
-        </div>
+        <button class="key" onclick="appendValue('(')">(</button>
+        <button class="key" onclick="appendValue('0')">0</button>
+        <button class="key" onclick="appendValue('.')">.</button>
+        <button class="key equal" onclick="calculate()">=</button>
+      </div>
     </div>
-</div>
- </div>
- <!-- CURRENCY CONVERTER CARD -->
-<div class="panel" style="margin-top:16px;background:#26364c">
-    <button class="tool" style="width:100%;text-align:left"
-        onclick="toggleCurrencyConverter()">
-        <strong>💱 CURRENCY CONVERTER</strong>
-        Convert currencies using live exchange rates
-    </button>
-
-    <div id="currencyConverter" style="display:none;margin-top:15px">
-        <h3>Currency Converter</h3>
-
-        <input class="field" type="number" id="currencyAmount"
-            placeholder="Enter amount" oninput="convertCurrency()">
-
-        <select class="field" id="currencyFrom" onchange="convertCurrency()">
-            <option value="UGX">Ugandan Shilling (UGX)</option>
-            <option value="USD">US Dollar (USD)</option>
-            <option value="EUR">Euro (EUR)</option>
-            <option value="GBP">British Pound (GBP)</option>
-            <option value="KES">Kenyan Shilling (KES)</option>
-            <option value="TZS">Tanzanian Shilling (TZS)</option>
-            <option value="RWF">Rwandan Franc (RWF)</option>
-        </select>
-
-        <select class="field" id="currencyTo" onchange="convertCurrency()">
-            <option value="USD">US Dollar (USD)</option>
-            <option value="UGX">Ugandan Shilling (UGX)</option>
-            <option value="EUR">Euro (EUR)</option>
-            <option value="GBP">British Pound (GBP)</option>
-            <option value="KES">Kenyan Shilling (KES)</option>
-            <option value="TZS">Tanzanian Shilling (TZS)</option>
-            <option value="RWF">Rwandan Franc (RWF)</option>
-        </select>
-
-        <div class="result" id="currencyResult">
-            Enter an amount to convert.
-        </div>
-
-        <button class="tool" onclick="loadCurrencyRates()">
-            ↻ Update Exchange Rates
-        </button>
-
-        <p id="currencyStatus" style="font-size:12px;color:#9aabc0">
-            Exchange rates have not been loaded yet.
-        </p>
+    <div class="panel">
+      <div class="history-head">
+        <h3>Calculation History</h3>
+        <button class="small-btn" onclick="clearHistory()">Clear</button>
+      </div>
+      <ol id="historyList" class="history-list"><li>No calculations yet.</li></ol>
     </div>
-</div>
-</section>
+  </section>
 
-<section id="tools" class="section">
- <div class="panel">
- <h3>Smart Tools</h3>
- <div class="tool-grid">
- <button class="tool" onclick="openTool('percentage')"><strong>%</strong>Percentage</button>
- <button class="tool" onclick="openTool('bmi')"><strong>⚖</strong>BMI calculator</button>
- <button class="tool" onclick="openTool('drip')"><strong>💧</strong>IV drip practice</button>
- <button class="tool" onclick="openTool('fluid')"><strong>🩺</strong>Fluid balance</button>
- </div>
- </div>
+  <section id="scientific" class="section">
+    <div class="panel">
+      <h2>Scientific Calculator</h2>
+      <div id="sciDisplay" class="display" aria-live="polite">0</div>
+      <div class="muted">Trigonometric functions use degrees. Use the buttons to build an expression, then press =.</div>
+      <div class="science-keys">
+        <button class="key clear" onclick="clearScientific()">AC</button>
+        <button class="key" onclick="deleteScientific()">DEL</button>
+        <button class="key" onclick="sciAppend('(')">(</button>
+        <button class="key" onclick="sciAppend(')')">)</button>
+        <button class="key" onclick="sciAppend('sin(')">sin</button>
+        <button class="key" onclick="sciAppend('cos(')">cos</button>
+        <button class="key" onclick="sciAppend('tan(')">tan</button>
+        <button class="key operator" onclick="sciAppend('/')">÷</button>
+        <button class="key" onclick="sciAppend('sqrt(')">√</button>
+        <button class="key" onclick="sciAppend('log(')">log</button>
+        <button class="key" onclick="sciAppend('ln(')">ln</button>
+        <button class="key operator" onclick="sciAppend('*')">×</button>
+        <button class="key" onclick="sciAppend('π')">π</button>
+        <button class="key" onclick="sciAppend('e')">e</button>
+        <button class="key" onclick="sciAppend('^')">xʸ</button>
+        <button class="key operator" onclick="sciAppend('-')">−</button>
+        <button class="key" onclick="sciAppend('7')">7</button>
+        <button class="key" onclick="sciAppend('8')">8</button>
+        <button class="key" onclick="sciAppend('9')">9</button>
+        <button class="key operator" onclick="sciAppend('+')">+</button>
+        <button class="key" onclick="sciAppend('4')">4</button>
+        <button class="key" onclick="sciAppend('5')">5</button>
+        <button class="key" onclick="sciAppend('6')">6</button>
+        <button class="key" onclick="sciAppend('.')">.</button>
+        <button class="key" onclick="sciAppend('1')">1</button>
+        <button class="key" onclick="sciAppend('2')">2</button>
+        <button class="key" onclick="sciAppend('3')">3</button>
+        <button class="key" onclick="sciAppend('0')">0</button>
+        <button class="key" onclick="sciAppend('%')">%</button>
+        <button class="key" onclick="sciAppend('!')">n!</button>
+        <button class="key equal" style="grid-column:span 2" onclick="calculateScientific()">=</button>
+      </div>
+    </div>
 
- <div class="panel" id="toolPanel">
- <h3 id="toolTitle">Choose a tool above</h3>
- <div id="toolFields"></div>
- <button class="action" id="toolAction" style="display:none" onclick="runTool()">Calculate</button>
- <div class="result" id="toolResult"></div>
- </div>
-</section>
+    <div class="panel">
+      <h3>Unit Converter</h3>
+      <div class="field">
+        <label for="unitCategory">Category</label>
+        <select id="unitCategory" onchange="fillUnitOptions()">
+          <option value="length">Length</option><option value="mass">Mass</option>
+          <option value="volume">Volume</option><option value="temperature">Temperature</option>
+          <option value="time">Time</option>
+        </select>
+      </div>
+      <div class="field"><label for="unitValue">Value</label><input id="unitValue" type="number" step="any" placeholder="Enter value"></div>
+      <div class="grid2">
+        <div class="field"><label for="unitFrom">From</label><select id="unitFrom"></select></div>
+        <div class="field"><label for="unitTo">To</label><select id="unitTo"></select></div>
+      </div>
+      <button class="action-btn" onclick="convertUnit()">Convert Units</button>
+      <div id="unitResult" class="result">Your conversion will appear here.</div>
+    </div>
 
-<div class="panel">
- <h3>Calculation History</h3>
- <div id="history"><p style="color:#91a2b8">No calculations yet.</p></div>
- <button class="action" onclick="clearHistory()">Clear History</button>
-</div>
+    <div class="panel">
+      <h3>Currency Converter</h3>
+      <p class="muted">Uses online exchange-rate data. An internet connection is required to refresh rates.</p>
+      <div class="field"><label for="currencyAmount">Amount</label><input id="currencyAmount" type="number" min="0" step="any" placeholder="Enter amount"></div>
+      <div class="grid2">
+        <div class="field"><label for="currencyFrom">From</label><select id="currencyFrom"></select></div>
+        <div class="field"><label for="currencyTo">To</label><select id="currencyTo"></select></div>
+      </div>
+      <button class="action-btn" onclick="convertCurrency()">Convert Currency</button>
+      <div id="currencyResult" class="result">Choose currencies and enter an amount.</div>
+      <div id="currencyUpdated" class="muted"></div>
+    </div>
+  </section>
 
-<footer>CLINT CALCULATOR © 2026<br>Designed for learning and everyday calculations</footer>
-</div>
+  <section id="tools" class="section">
+    <div class="panel">
+      <h2>Study & Nursing Tools</h2>
+      <p class="muted">These are learning aids. Always follow your lecturer's instructions and your facility's clinical protocols when carrying out real patient care.</p>
+
+      <div class="tool-card">
+        <h3>Percentage Calculator</h3>
+        <div class="field"><label for="percentValue">What is the percentage?</label><input id="percentValue" type="number" step="any" placeholder="e.g. 20"></div>
+        <div class="field"><label for="percentOf">Of what number?</label><input id="percentOf" type="number" step="any" placeholder="e.g. 150"></div>
+        <button class="action-btn" onclick="calculatePercentage()">Calculate Percentage</button>
+        <div id="percentResult" class="result">Result will appear here.</div>
+      </div>
+
+      <div class="tool-card" style="margin-top:12px">
+        <h3>BMI Learning Calculator</h3>
+        <div class="grid2">
+          <div class="field"><label for="bmiWeight">Weight (kg)</label><input id="bmiWeight" type="number" min="0" step="any"></div>
+          <div class="field"><label for="bmiHeight">Height (cm)</label><input id="bmiHeight" type="number" min="0" step="any"></div>
+        </div>
+        <button class="action-btn" onclick="calculateBMI()">Calculate BMI</button>
+        <div id="bmiResult" class="result">For educational practice only; BMI is not a diagnosis and is not suitable for assessing everyone.</div>
+      </div>
+
+      <div class="tool-card" style="margin-top:12px">
+        <h3>IV Drip Rate Practice</h3>
+        <div class="grid2">
+          <div class="field"><label for="ivVolume">Volume (mL)</label><input id="ivVolume" type="number" min="0" step="any"></div>
+          <div class="field"><label for="ivTime">Time (hours)</label><input id="ivTime" type="number" min="0" step="any"></div>
+        </div>
+        <div class="field"><label for="ivDrop">Drop factor (gtt/mL)</label><select id="ivDrop"><option value="10">10</option><option value="15">15</option><option value="20" selected>20</option><option value="60">60 (microdrip)</option></select></div>
+        <button class="action-btn" onclick="calculateIV()">Calculate Practice Rate</button>
+        <div id="ivResult" class="result">Formula: (Volume × Drop factor) ÷ Time in minutes.</div>
+        <p class="muted">Practice only. Never use this result alone to set a real infusion; verify the prescription, equipment, patient and local protocol with a qualified supervisor.</p>
+      </div>
+
+      <div class="tool-card" style="margin-top:12px">
+        <h3>Fluid Balance Practice</h3>
+        <div class="grid2">
+          <div class="field"><label for="fluidIn">Total intake (mL)</label><input id="fluidIn" type="number" min="0" step="any"></div>
+          <div class="field"><label for="fluidOut">Total output (mL)</label><input id="fluidOut" type="number" min="0" step="any"></div>
+        </div>
+        <button class="action-btn" onclick="calculateFluidBalance()">Calculate Balance</button>
+        <div id="fluidResult" class="result">Fluid balance = total intake − total output.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Clint Calculator • Works offline for core calculator functions</footer>
+</main>
 
 <script>
-const display=document.getElementById("display");
-let history=[];
-let currentTool="";
+"use strict";
 
-function showTab(id,button){
- document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
- document.getElementById(id).classList.add("active");
- document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
- button.classList.add("active");
-}
-function append(v){display.value+=v}
-function clearDisplay(){display.value="";document.getElementById("previous").textContent=""}
-function del(){display.value=display.value.slice(0,-1)}
+const display = document.getElementById("display");
+const expressionLine = document.getElementById("expression");
+const sciDisplay = document.getElementById("sciDisplay");
+let currentExpression = "";
+let scientificExpression = "";
+let historyItems = [];
 
-function format(n){
- return Number.isFinite(n)?Number(n.toPrecision(12)).toString():"Error";
-}
-
-function calculate(){
- try{
- let exp=display.value;
- if(!exp||!/^[0-9+\-*/().% ]+$/.test(exp))throw Error();
- let result=Function('"use strict";return ('+exp+')')();
- if(!Number.isFinite(result))throw Error();
- result=format(result);
- document.getElementById("previous").textContent=exp+" =";
- display.value=result;
- addHistory(exp,result);
- }catch{display.value="Error"}
+function showTab(id, button) {
+  document.querySelectorAll(".section").forEach(section => section.classList.remove("active"));
+  const target = document.getElementById(id);
+  if (target) target.classList.add("active");
+  document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+  if (button) button.classList.add("active");
 }
 
-function scientific(type){
- let x=Number(display.value);
- if(type==="pi"){display.value=Math.PI;return}
- if(!display.value||!Number.isFinite(x))return;
- let r;
- switch(type){
- case "sin":r=Math.sin(x*Math.PI/180);break;
- case "cos":r=Math.cos(x*Math.PI/180);break;
- case "tan":r=Math.tan(x*Math.PI/180);break;
- case "sqrt":r=Math.sqrt(x);break;
- case "square":r=x*x;break;
- case "log":r=Math.log10(x);break;
- case "ln":r=Math.log(x);break;
- case "fact":
- if(x<0||!Number.isInteger(x)||x>170){display.value="Error";return}
- r=1;for(let i=2;i<=x;i++)r*=i;break;
- }
- if(!Number.isFinite(r)){display.value="Error";return}
- let old=display.value;
- display.value=format(r);
- addHistory(type+"("+old+")",display.value);
+function toggleTheme() {
+  document.body.classList.toggle("light");
 }
 
-function addHistory(a,b){
- history.unshift({a,b});
- history=history.slice(0,20);
- renderHistory();
+function appendValue(value) {
+  if (display.textContent === "Error") currentExpression = "";
+  currentExpression += value;
+  display.textContent = currentExpression || "0";
 }
-function renderHistory(){
- document.getElementById("history").innerHTML=history.length?
- history.map((h,i)=>`<div class="history-item"><span>${h.a} = <b>${h.b}</b></span><button onclick="recall(${i})">Use</button></div>`).join(""):
- '<p style="color:#91a2b8">No calculations yet.</p>';
+function clearDisplay() {
+  currentExpression = "";
+  display.textContent = "0";
+  expressionLine.textContent = "";
 }
-function recall(i){display.value=history[i].b}
-function clearHistory(){history=[];renderHistory()}
-
-function toggleTheme(){document.body.classList.toggle("light")}
-
-function openTool(type){
- currentTool=type;
- let titles={
- percentage:"Percentage Calculator",
- bmi:"BMI Calculator",
- drip:"IV Drip Rate Practice",
- fluid:"Fluid Balance Calculator"
- };
- document.getElementById("toolTitle").textContent=titles[type];
- document.getElementById("toolResult").textContent="";
- document.getElementById("toolAction").style.display="block";
- let fields={
- percentage:'<input class="field" id="a" type="number" placeholder="Enter the number"><input class="field" id="b" type="number" placeholder="Enter percentage">',
- bmi:'<input class="field" id="a" type="number" placeholder="Weight in kg"><input class="field" id="b" type="number" placeholder="Height in metres">',
- drip:'<input class="field" id="a" type="number" placeholder="Volume in mL"><input class="field" id="b" type="number" placeholder="Time in hours"><input class="field" id="c" type="number" placeholder="Drop factor (drops/mL)">',
- fluid:'<input class="field" id="a" type="number" placeholder="Total fluid intake (mL)"><input class="field" id="b" type="number" placeholder="Total fluid output (mL)">'
- };
- document.getElementById("toolFields").innerHTML=fields[type];
+function deleteLast() {
+  currentExpression = currentExpression.slice(0, -1);
+  display.textContent = currentExpression || "0";
 }
-function runTool(){
- let a=Number(document.getElementById("a").value);
- let b=Number(document.getElementById("b").value);
- let c=document.getElementById("c")?Number(document.getElementById("c").value):0;
- let r;
- if(currentTool==="percentage"){
- if(!Number.isFinite(a)||!Number.isFinite(b))return;
- r=a*b/100+" is "+b+"% of "+a;
- }
- if(currentTool==="bmi"){
- if(a<=0||b<=0)return;
- r="BMI: "+format(a/(b*b))+" kg/m². Interpret using appropriate age-specific guidance.";
- }
- if(currentTool==="drip"){
- if(a<=0||b<=0||c<=0)return;
- r="Practice result: "+format((a*c)/(b*60))+" drops/min";
- }
- if(currentTool==="fluid"){
- if(a<0||b<0)return;
- let balance=a-b;
- r="Fluid balance: "+format(balance)+" mL ("+(balance>=0?"positive":"negative")+")";
- }
- document.getElementById("toolResult").textContent=r;
+function safeCalculate(expression) {
+  const cleaned = expression.replace(/×/g, "*").replace(/÷/g, "/");
+  if (!cleaned || !/^[0-9+\-*/().%\s]+$/.test(cleaned)) throw new Error("Invalid expression");
+  const result = Function('"use strict"; return (' + cleaned + ')')();
+  if (!Number.isFinite(result)) throw new Error("Math error");
+  return result;
 }
- function toggleUnitConverter(){
-    const box = document.getElementById("unitConverter");
-    const opening = box.style.display === "none";
-    box.style.display = opening ? "block" : "none";
-
-    if(opening && !document.getElementById("unitFrom").options.length){
-        fillUnitOptions();
-    }
+function calculate() {
+  try {
+    const answer = safeCalculate(currentExpression);
+    expressionLine.textContent = currentExpression + " =";
+    display.textContent = String(Number(answer.toPrecision(12)));
+    addHistory(currentExpression + " = " + display.textContent);
+    currentExpression = String(Number(answer.toPrecision(12)));
+  } catch (error) {
+    display.textContent = "Error";
+    expressionLine.textContent = "Check your expression";
+    currentExpression = "";
+  }
+}
+function addHistory(item) {
+  historyItems.unshift(item);
+  historyItems = historyItems.slice(0, 30);
+  renderHistory();
+}
+function renderHistory() {
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+  if (!historyItems.length) {
+    const li = document.createElement("li");
+    li.textContent = "No calculations yet.";
+    list.appendChild(li);
+    return;
+  }
+  historyItems.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+}
+function clearHistory() {
+  historyItems = [];
+  renderHistory();
 }
 
-const unitData = {
-    length: {
-        Metre: 1,
-        Kilometre: 1000,
-        Centimetre: 0.01,
-        Millimetre: 0.001,
-        Mile: 1609.344,
-        Foot: 0.3048,
-        Inch: 0.0254
-    },
-    weight: {
-        Kilogram: 1,
-        Gram: 0.001,
-        Milligram: 0.000001,
-        Pound: 0.45359237,
-        Ounce: 0.028349523125
-    },
-    volume: {
-        Litre: 1,
-        Millilitre: 0.001,
-        "Cubic metre": 1000,
-        "US gallon": 3.785411784
-    },
-    temperature: {
-        Celsius: "C",
-        Fahrenheit: "F",
-        Kelvin: "K"
-    }
+function sciAppend(value) {
+  if (sciDisplay.textContent === "Error") scientificExpression = "";
+  scientificExpression += value;
+  sciDisplay.textContent = scientificExpression || "0";
+}
+function clearScientific() {
+  scientificExpression = "";
+  sciDisplay.textContent = "0";
+}
+function deleteScientific() {
+  scientificExpression = scientificExpression.slice(0, -1);
+  sciDisplay.textContent = scientificExpression || "0";
+}
+function factorial(n) {
+  if (!Number.isInteger(n) || n < 0 || n > 170) throw new Error("Factorial requires a whole number from 0 to 170");
+  let answer = 1;
+  for (let i = 2; i <= n; i++) answer *= i;
+  return answer;
+}
+function calculateScientific() {
+  try {
+    let exp = scientificExpression
+      .replace(/π/g, "Math.PI")
+      .replace(/\be\b/g, "Math.E")
+      .replace(/\^/g, "**")
+      .replace(/(\d+(?:\.\d+)?)%/g, "($1/100)")
+      .replace(/sin\(/g, "Math.sin(Math.PI/180*")
+      .replace(/cos\(/g, "Math.cos(Math.PI/180*")
+      .replace(/tan\(/g, "Math.tan(Math.PI/180*")
+      .replace(/sqrt\(/g, "Math.sqrt(")
+      .replace(/log\(/g, "Math.log10(")
+      .replace(/ln\(/g, "Math.log(");
+    exp = exp.replace(/(\d+(?:\.\d+)?)!/g, "factorial($1)");
+    if (!exp || !/^[0-9+\-*/().\sA-Za-z_*]+$/.test(exp)) throw new Error("Invalid expression");
+    const answer = Function("factorial", '"use strict"; return (' + exp + ')')(factorial);
+    if (!Number.isFinite(answer)) throw new Error("Math error");
+    sciDisplay.textContent = String(Number(answer.toPrecision(12)));
+    addHistory(scientificExpression + " = " + sciDisplay.textContent);
+    scientificExpression = String(Number(answer.toPrecision(12)));
+  } catch (error) {
+    sciDisplay.textContent = "Error";
+  }
+}
+
+/* Unit converter */
+const unitDefinitions = {
+  length: {m:1, km:1000, cm:0.01, mm:0.001, mile:1609.344, yard:0.9144, foot:0.3048, inch:0.0254},
+  mass: {kg:1, g:0.001, mg:0.000001, tonne:1000, lb:0.45359237, oz:0.028349523125},
+  volume: {L:1, mL:0.001, m3:1000, cup:0.2365882365, pint:0.473176473, gallon:3.785411784},
+  time: {second:1, minute:60, hour:3600, day:86400}
 };
-
-function fillUnitOptions(){
-    const category = document.getElementById("unitCategory").value;
-    const from = document.getElementById("unitFrom");
-    const to = document.getElementById("unitTo");
-
-    from.innerHTML = "";
-    to.innerHTML = "";
-
-    Object.keys(unitData[category]).forEach(unit => {
-        from.add(new Option(unit, unit));
-        to.add(new Option(unit, unit));
+const unitLabels = {
+  length:{m:"Metre (m)",km:"Kilometre (km)",cm:"Centimetre (cm)",mm:"Millimetre (mm)",mile:"Mile",yard:"Yard",foot:"Foot",inch:"Inch"},
+  mass:{kg:"Kilogram (kg)",g:"Gram (g)",mg:"Milligram (mg)",tonne:"Tonne",lb:"Pound (lb)",oz:"Ounce (oz)"},
+  volume:{L:"Litre (L)",mL:"Millilitre (mL)",m3:"Cubic metre (m³)",cup:"Cup (US)",pint:"Pint (US)",gallon:"Gallon (US)"},
+  time:{second:"Second",minute:"Minute",hour:"Hour",day:"Day"}
+};
+function fillUnitOptions() {
+  const category = document.getElementById("unitCategory").value;
+  const from = document.getElementById("unitFrom");
+  const to = document.getElementById("unitTo");
+  from.innerHTML = ""; to.innerHTML = "";
+  const keys = category === "temperature" ? ["C","F","K"] : Object.keys(unitDefinitions[category]);
+  keys.forEach((key, index) => {
+    const label = category === "temperature" ? ({C:"Celsius (°C)",F:"Fahrenheit (°F)",K:"Kelvin (K)"}[key]) : unitLabels[category][key];
+    [from,to].forEach(select => {
+      const option = document.createElement("option");
+      option.value = key; option.textContent = label;
+      select.appendChild(option);
     });
-
-    if(to.options.length > 1) to.selectedIndex = 1;
-
-    convertUnit();
-}
-
-function convertUnit(){
-    const value = document.getElementById("unitValue").value;
-    const category = document.getElementById("unitCategory").value;
-    const from = document.getElementById("unitFrom").value;
-    const to = document.getElementById("unitTo").value;
-    const result = document.getElementById("unitResult");
-
-    if(value === ""){
-        result.textContent = "Your result will appear here.";
-        return;
-    }
-
-    const number = Number(value);
-
-    if(!Number.isFinite(number)){
-        result.textContent = "Enter a valid number.";
-        return;
-    }
-
-    let answer;
-
-    if(category === "temperature"){
-        let celsius;
-
-        if(from === "Celsius") celsius = number;
-        else if(from === "Fahrenheit") celsius = (number - 32) * 5/9;
-        else celsius = number - 273.15;
-
-        if(to === "Celsius") answer = celsius;
-        else if(to === "Fahrenheit") answer = celsius * 9/5 + 32;
-        else answer = celsius + 273.15;
-    } else {
-        answer = number * unitData[category][from] / unitData[category][to];
-    }
-
-    result.textContent = Number(answer.toPrecision(10)) + " " + to;
-                                            }
- 
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js")
-        .then(() => console.log("Clint Calculator is ready offline"))
-        .catch(error => console.error("Service worker error:", error));
-    });
-}
-</script>
- 
-
- 
-</body>
-</html>
+    if (index === 1) to.valu
