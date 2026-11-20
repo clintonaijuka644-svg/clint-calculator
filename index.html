@@ -646,6 +646,182 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   });
 }
 </script>
+  <style>
+.extra-panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px;
+  margin:14px 0;
+  box-shadow:var(--shadow);
+}
+.extra-panel h2 {margin-bottom:12px}
+.extra-panel button {
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:var(--accent);
+  color:#06251d;
+  font-weight:bold;
+  cursor:pointer;
+  width:100%;
+  margin-top:8px;
+}
+.extra-panel .field {margin:12px 0}
+.voice-status {
+  color:var(--muted);
+  font-size:13px;
+  margin-top:10px;
+}
+</style>
+
+<div class="extra-panel">
+  <h2>🎙️ Voice Assistant</h2>
+  <p class="muted">Speak a calculation or ask the calculator to read your answer.</p>
+
+  <button type="button" onclick="startVoiceInput()">🎤 Speak Calculation</button>
+  <button type="button" onclick="speakAnswer()">🔊 Speak Answer</button>
+
+  <div id="voiceStatus" class="voice-status">
+    Voice assistant is ready.
+  </div>
+</div>
+
+<div class="extra-panel">
+  <h2>🎨 Personalisation</h2>
+
+  <div class="field">
+    <label for="accentPicker">Choose accent colour</label>
+    <input type="color" id="accentPicker" value="#00dfa0">
+  </div>
+
+  <div class="field">
+    <label for="decimalSetting">Decimal precision</label>
+    <select id="decimalSetting">
+      <option value="2">2 decimal places</option>
+      <option value="4">4 decimal places</option>
+      <option value="6">6 decimal places</option>
+      <option value="8">8 decimal places</option>
+      <option value="12" selected>12 decimal places</option>
+    </select>
+  </div>
+
+  <button type="button" onclick="savePersonalisation()">
+    Save Preferences
+  </button>
+
+  <div id="personalStatus" class="voice-status">
+    Your preferences will be saved on this device.
+  </div>
+</div>
+
+<script>
+/* VOICE ASSISTANT */
+function startVoiceInput() {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const status = document.getElementById("voiceStatus");
+
+  if (!SpeechRecognition) {
+    status.textContent =
+      "Voice input is not supported by this browser. Try Chrome.";
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+
+  status.textContent = "Listening...";
+
+  recognition.onresult = function(event) {
+    let spoken = event.results[0][0].transcript.toLowerCase();
+
+    spoken = spoken
+      .replace(/plus/g, "+")
+      .replace(/minus/g, "-")
+      .replace(/times|multiplied by/g, "*")
+      .replace(/divided by/g, "/")
+      .replace(/point/g, ".")
+      .replace(/into/g, "*")
+      .replace(/open bracket/g, "(")
+      .replace(/close bracket/g, ")")
+      .replace(/ /g, "");
+
+    currentExpression = spoken;
+    display.textContent = currentExpression || "0";
+
+    status.textContent = "Recognised: " + spoken;
+  };
+
+  recognition.onerror = function() {
+    status.textContent = "Voice recognition failed. Please try again.";
+  };
+
+  recognition.onend = function() {
+    if (status.textContent === "Listening...") {
+      status.textContent = "No speech detected.";
+    }
+  };
+
+  recognition.start();
+}
+
+function speakAnswer() {
+  const answer = display.textContent;
+
+  if (!("speechSynthesis" in window)) {
+    document.getElementById("voiceStatus").textContent =
+      "Spoken answers are not supported by this browser.";
+    return;
+  }
+
+  if (!answer || answer === "0" || answer === "Error") {
+    document.getElementById("voiceStatus").textContent =
+      "Calculate an answer first.";
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(
+    "The answer is " + answer
+  );
+
+  speech.lang = "en-US";
+  speechSynthesis.speak(speech);
+
+  document.getElementById("voiceStatus").textContent =
+    "Reading your answer...";
+}
+
+/* PERSONALISATION */
+function savePersonalisation() {
+  const accent = document.getElementById("accentPicker").value;
+  const precision = document.getElementById("decimalSetting").value;
+
+  document.documentElement.style.setProperty("--accent", accent);
+
+  localStorage.setItem("clintAccent", accent);
+  localStorage.setItem("clintPrecision", precision);
+
+  document.getElementById("personalStatus").textContent =
+    "Preferences saved successfully.";
+}
+
+function loadPersonalisation() {
+  const accent = localStorage.getItem("clintAccent") || "#00dfa0";
+  const precision = localStorage.getItem("clintPrecision") || "12";
+
+  document.documentElement.style.setProperty("--accent", accent);
+
+  document.getElementById("accentPicker").value = accent;
+  document.getElementById("decimalSetting").value = precision;
+}
+
+loadPersonalisation();
+</script>
 </body>
 </html>
   
